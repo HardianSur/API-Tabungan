@@ -14,7 +14,8 @@
             Schema::create('pays', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('target_id')->constrained()->onDelete('cascade');
-                $table->integer('uang_masuk');
+                $table->bigInteger('uang_masuk');
+                $table->enum('operasi',['tambah', 'kurang']);
                 $table->timestamps();
             });
         }

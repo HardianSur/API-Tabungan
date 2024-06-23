@@ -16,9 +16,9 @@ return new class extends Migration
             $table->foreignId('user_id');
             $table->string('judul');
             $table->text('gambar');
-            $table->integer('target_uang');
-            $table->integer('uang_tersimpan')->default(0);
-            $table->integer('nominal_pengisian');
+            $table->bigInteger('target_uang');
+            $table->bigInteger('uang_tersimpan')->default(0);
+            $table->bigInteger('nominal_pengisian');
             $table->enum('jadwal_menabung',['hari','minggu','bulan']);
             $table->enum('status',['berlangsung','tercapai'])->default('berlangsung');
             $table->timestamps();

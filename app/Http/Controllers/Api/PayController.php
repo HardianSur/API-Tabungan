@@ -29,9 +29,10 @@ class PayController extends Controller
         return new TargetResource(true, 'Detail Data Tabungan!', $pays);
     }
 
-    public function getPayByTargetId($id){
+    public function getPayByTargetId($id)
+    {
         //define validation rules
-        $validator = Validator::make(["target_id"=>$id], [
+        $validator = Validator::make(["target_id" => $id], [
             'target_id' => 'required|exists:targets,id'
         ]);
 
@@ -47,20 +48,16 @@ class PayController extends Controller
         }
 
         //return single post as a resource
-        return new TargetResource(true, 'Detail Data Tabungan!', $pays);
+        return response()->json($pays);
     }
 
     public function store(Request $request)
     {
-        // Additional validation for 'status' column in 'targets' table
-        $target = Target::find($request->target_id);
-        if ($target && $target->status !== 'berlangsung') {
-            return response()->json(['error' => 'Uang Sudah Terpenuhi'], 422);
-        }
 
         //define validation rules
         $validator = Validator::make($request->all(), [
             'target_id' => 'required|exists:targets,id',
+            'operasi' => 'required|in:tambah,kurang',
             'uang_masuk' => 'required|min:1',
         ]);
 
@@ -70,42 +67,51 @@ class PayController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        //find target by ID
+        // Additional validation for 'status' column in 'targets' table
         $target = Target::find($request->target_id);
+        if ($target && $target->status !== 'berlangsung') {
+            return response()->json(['error' => 'Tabungan Telah Tercapai'], 422);
+        }
 
+        switch ($request->operasi) {
+            case 'tambah':
+                if (($target->uang_tersimpan + $request->uang_masuk) > $target->target_uang) {
+                    return response()->json([
+                        "message" => "uang yang ditabung melebihi batas"
+                    ]);
+                }
 
-
-        //check value status
-        if ($target->status == 'tercapai') {
-            return response()->json([
-                "message" => "tabungan telah tercapai"
-            ]);
+                //increase value 'uang_tersimpan'
+                $target->increment('uang_tersimpan', $request->uang_masuk);
+                break;
+            case 'kurang':
+                if($request->uang_masuk > $target->uang_tersimpan ){
+                    return response()->json([
+                        "message" => "uang yang dikurang melebihi uang yang ditabung"
+                    ]);
+                }
+                $target->decrement('uang_tersimpan', $request->uang_masuk);
+                break;
+            default:
+                return response()->json(array('error' =>'Invalid'));
         }
 
         //create pay
         $pay = Pay::create([
             'target_id' => $request->target_id,
             'uang_masuk' => $request->uang_masuk,
+            'operasi' => $request->operasi,
         ]);
 
-        //increase value 'uang_tersimpan'
-        $target->increment('uang_tersimpan', $request->uang_masuk);
-
-        //validated
-        if ($target->uang_tersimpan > $target->target_uang) {
-            $target->decrement('uang_tersimpan', $request->uang_masuk);
-            $this->destroy($pay->id);
-            return response()->json([
-                "message" => "uang yang ditabung melebihi batas"
-            ]);
-        } elseif ($target->uang_tersimpan == $target->target_uang) {
-            $target::update([
+        if ($target->uang_tersimpan == $target->target_uang) {
+            $target->update([
                 'status' => 'tercapai'
             ]);
             return new PayResource(true, 'Tabungan telah Tercapai', app('App\Http\Controllers\Api\TargetController')->show($target->id));
         }
 
-        return new PayResource(true, 'Data Pembayaran Berhasil Ditambahkan!', app('App\Http\Controllers\Api\TargetController')->show($target->id));
+
+        return new PayResource(true, 'Data Pembayaran Berhasil Di' . $request->operasi . '!', app('App\Http\Controllers\Api\TargetController')->show($target->id));
     }
 
     public function update(Request $request, $id)
@@ -167,8 +173,8 @@ class PayController extends Controller
     public function destroy($id)
     {
         //define validation rules
-        $validator = Validator::make(['id'=>$id], [
-            'id'=>'required|exists:pays,id'
+        $validator = Validator::make(['id' => $id], [
+            'id' => 'required|exists:pays,id'
         ]);
 
         //check if validation fails

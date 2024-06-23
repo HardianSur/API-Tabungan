@@ -30,15 +30,15 @@ class DatabaseSeeder extends Seeder
             'jadwal_menabung'=>'minggu'
         ]);
 
-        Pay::create([
-            'target_id' => 1,
-            'uang_masuk' =>50000
-        ]);
+        // Pay::create([
+        //     'target_id' => 1,
+        //     'uang_masuk' =>50000
+        // ]);
 
-        Pay::create([
-            'target_id' => 1,
-            'uang_masuk' =>60000
-        ]);
+        // Pay::create([
+        //     'target_id' => 1,
+        //     'uang_masuk' =>60000
+        // ]);
 
         // User::factory(5)->create();
         // Target::factory(60)->create();
