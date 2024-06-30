@@ -78,22 +78,22 @@ class PayController extends Controller
                 if (($target->uang_tersimpan + $request->uang_masuk) > $target->target_uang) {
                     return response()->json([
                         "message" => "uang yang ditabung melebihi batas"
-                    ]);
+                    ], 422);
                 }
 
                 //increase value 'uang_tersimpan'
                 $target->increment('uang_tersimpan', $request->uang_masuk);
                 break;
             case 'kurang':
-                if($request->uang_masuk > $target->uang_tersimpan ){
+                if ($request->uang_masuk > $target->uang_tersimpan) {
                     return response()->json([
                         "message" => "uang yang dikurang melebihi uang yang ditabung"
-                    ]);
+                    ], 422);
                 }
                 $target->decrement('uang_tersimpan', $request->uang_masuk);
                 break;
             default:
-                return response()->json(array('error' =>'Invalid'));
+                return response()->json(['error' => 'Invalid'], 400);
         }
 
         //create pay
@@ -131,21 +131,21 @@ class PayController extends Controller
         //find pay by id
         $pay = Pay::find($id);
 
-        //find target by target_id 
+        //find target by target_id
         $target = Target::find($pay->target_id);
 
         //check value status
         if ($target->status == 'tercapai') {
             return response()->json([
                 "message" => "tabungan telah tercapai"
-            ]);
+            ],422);
         }
 
 
         if ($request->operasi == 'kurang' && $request->uang_masuk > $pay->uang_masuk) {
             return response()->json([
                 "message" => "uang yang dikurangi lebih besar dari yang tersimpan"
-            ]);
+            ],422);
         } elseif ($request->operasi == 'kurang') {
             $target->decrement('uang_tersimpan', $request->uang_masuk);
             $pay->decrement('uang_masuk', $request->uang_masuk);
@@ -157,7 +157,7 @@ class PayController extends Controller
                 $pay->decrement('uang_tersimpan', $request->uang_masuk);
                 return response()->json([
                     "message" => "uang yang ditabung melebihi batas"
-                ]);
+                ],422);
             } elseif ($target->uang_tersimpan == $target->target_uang) {
                 $target::update([
                     'status' => 'tercapai'
@@ -185,7 +185,7 @@ class PayController extends Controller
         //find pay by id
         $pay = Pay::find($id);
 
-        //find target by target_id 
+        //find target by target_id
         $target = Target::find($pay->target_id);
 
         $target->decrement('uang_tersimpan', $pay->uang_masuk);

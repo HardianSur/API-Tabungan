@@ -34,7 +34,7 @@ class TargetController extends Controller
             'status' => 'required|in:berlangsung,tercapai',
         ]);
         // dd($validator);
-        
+
 
         //check if validation fails
         if ($validator->fails()) {
@@ -45,9 +45,9 @@ class TargetController extends Controller
         $target = Target::where('user_id', $id)->where('status', $request->status)->latest()->paginate(10);
 
         if ($target->isEmpty() && $request->status == 'berlangsung') {
-            return response()->json(['message' => 'Belum Ada Tabungan']);
+            return response()->json(['message' => 'Belum Ada Tabungan'],204);
         } elseif ($target->isEmpty() && $request->status == 'tercapai') {
-            return response()->json(['message' => 'Belum Ada Tabungan Yang Tercapai']);
+            return response()->json(['message' => 'Belum Ada Tabungan Yang Tercapai'],204);
         }
 
         //return collection of posts as a resource
@@ -71,7 +71,9 @@ class TargetController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        // return new TargetResource(true, 'Data Tabungan Berhasil Ditambahkan!', $request->all());
+        if($request->nominal_pengisian >= $request->target_uang){
+            return response()->json(['message' => 'Nominal Pengisian Tidak Boleh Lebih Besar Dari Target Uang'], 422);
+        }
 
 
         //upload image

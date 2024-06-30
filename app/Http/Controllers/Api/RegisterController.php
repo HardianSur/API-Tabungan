@@ -56,7 +56,9 @@ class RegisterController extends Controller
 
             return new TargetResource(true, 'User berhasil login', [$success, $user]);
         } else {
-            return new TargetResource(false, 'Gagal', ['data' => 'password atau username salah']);
+            return response()->json([
+                "status" =>"401",
+                "massage"=>"username atau password salah"], 401);
         }
     }
 
