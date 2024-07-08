@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('targets', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id');
+            $table->uuid('id')->primary();
+            $table->uuid('user_id')->index();
             $table->string('judul');
             $table->text('gambar');
             $table->bigInteger('target_uang');

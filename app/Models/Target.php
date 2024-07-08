@@ -3,14 +3,17 @@
 namespace App\Models;
 
 use App\Models\Pay;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Target extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $guarded= [
         'id'
@@ -25,7 +28,12 @@ class Target extends Model
 
     public function pays(): HasMany
     {
-        return $this->hasMany(Pay::class);
+        return $this->hasMany(Pay::class,'target_id','id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
 }

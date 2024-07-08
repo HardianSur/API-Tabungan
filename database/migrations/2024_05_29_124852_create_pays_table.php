@@ -12,8 +12,8 @@
         public function up(): void
         {
             Schema::create('pays', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('target_id')->constrained()->onDelete('cascade');
+                $table->uuid('id');
+                $table->uuid('target_id')->constrained()->onDelete('cascade')->index();
                 $table->bigInteger('uang_masuk');
                 $table->enum('operasi',['tambah', 'kurang']);
                 $table->timestamps();
