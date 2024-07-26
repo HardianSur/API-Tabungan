@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Rep\Auth\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PayController;
@@ -11,9 +12,9 @@ use App\Http\Controllers\Api\RegisterController;
 // })->middleware('auth:sanctum');
 
 
-Route::controller(RegisterController::class)->group(function(){
+Route::controller(AuthController::class)->group(function(){
     Route::post('auth/register', 'register');
-    Route::post('auth/login', 'login');
+    Route::post('auth/login', 'signin');
 });
 
 Route::middleware('auth:sanctum')->group( function () {
